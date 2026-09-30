@@ -87,14 +87,14 @@ public class BabyOKeysScript : OKeysBaseScript {
 		if (displayedValues.Distinct().Count() == displayedValues.Count)
 		{ // 3 distinct labels = one of the sequences.
 			var idxLookup = Enumerable.Range(0, 6).First(a => sequencesLookup[a].SequenceEqual(displayedValues));
-			QuickLogDebug("{1}: {0}", idxLookup, displayedValues.Join(","));
+			//QuickLogDebug("{1}: {0}", idxLookup, displayedValues.Join(","));
 			obtainedOrder.AddRange(orderSequences[idxLookup]);
         }
 		else
 		{ // 1-2 distinct values case.
-			QuickLogDebug(displayedValues.Join());
+			//QuickLogDebug(displayedValues.Join());
 			var countsOccurance = Enumerable.Range(1, 3).Select(a => displayedValues.Count(b => b == a));
-			QuickLogDebug(countsOccurance.Join());
+			//QuickLogDebug(countsOccurance.Join());
 			var xthDigitMod2 = bombInfo.GetSerialNumberNumbers().ElementAt(stagesCompleted) % 2; // Technically value B
 			var idxMax = Enumerable.Range(0, 3).Single(a => countsOccurance.ElementAt(a) >= countsOccurance.Max()); // Technically value A.
 			obtainedOrder.AddRange(orderSequences[3 * xthDigitMod2 + idxMax]);
@@ -119,6 +119,7 @@ public class BabyOKeysScript : OKeysBaseScript {
     {
 		buttonsPressed[idx] = true;
 		keySelectables[idx].transform.localPosition = Vector3.back;
+		keySelectables[idx].AddInteractionPunch();
 		mAudio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, keySelectables[idx].transform);
 		sequencePressed.Add(idx);
 		if (sequencePressed.Count >= 3)
@@ -198,7 +199,7 @@ public class BabyOKeysScript : OKeysBaseScript {
 			DecryptAndSetSpecificKey(x);
     }
 
-    private readonly string TwitchHelpMessage = "!{0} press 123 [position in reading order, \"press\" optional] | !{0} colorblind/colourblind/cb";
+	private readonly string TwitchHelpMessage = "!{0} press 123 [position in reading order, \"press\" optional] | !{0} colorblind/colourblind/cb";
 
     protected override IEnumerator ProcessTwitchCommand(string cmd)
     {
@@ -217,12 +218,57 @@ public class BabyOKeysScript : OKeysBaseScript {
         }
 		else if (rgxPress.Success)
         {
-
+			var validPressCmd = rgxPress.Value.ToLowerInvariant().Trim();
+			if (validPressCmd.StartsWith("start"))
+				validPressCmd = validPressCmd.Substring(5).Trim();
+			var validPressCmdParts = validPressCmd.Split();
+			var validDigits = "123";
+			var allIdxes = new List<int>();
+			foreach (var valPart in validPressCmdParts)
+			{
+				foreach (var chr in valPart)
+				{
+					if (!validDigits.Contains(chr))
+					{
+						yield return string.Format("sendtochaterror The corresponding character \"{0}\" is not a valid digit!", chr);
+						yield break;
+					}
+					allIdxes.Add(validDigits.IndexOf(chr));
+				}
+			}
+			if (allIdxes.Any())
+            {
+				yield return null;
+				foreach (var idx in allIdxes)
+                {
+					keySelectables[idx].OnInteract();
+					yield return new WaitForSeconds(0.1f);
+                }
+				if (moduleSolved)
+					yield return "solve";
+            }
         }
     }
 
     protected override IEnumerator TwitchHandleForcedSolve()
     {
-		yield return HandleSolveAnim(delay: 0.1f, repeatCount: 10);
+		while (!moduleSolved)
+        {
+			while (!interactable)
+				yield return true;
+
+			if (sequencePressed.Any() && !sequenceExpected.Take(sequencePressed.Count).SequenceEqual(sequencePressed))
+            {
+				yield return HandleSolveAnim(delay: 0.1f, repeatCount: 10);
+				yield break;
+			}
+			while (sequencePressed.Count < sequenceExpected.Count)
+            {
+				keySelectables[sequenceExpected[sequencePressed.Count]].OnInteract();
+				yield return new WaitForSeconds(0.1f);
+            }
+        }
+		while (moduleSolved)
+			yield return true;
 	}
 }

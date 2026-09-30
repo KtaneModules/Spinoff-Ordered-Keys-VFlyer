@@ -21,6 +21,7 @@ GameObject:
   - component: {fileID: 4389859566290442}
   - component: {fileID: 33902134328143482}
   - component: {fileID: 23583410745144188}
+  - component: {fileID: 114787995995244280}
   m_Layer: 0
   m_Name: StageLightL
   m_TagString: Untagged
@@ -194,6 +195,7 @@ GameObject:
   - component: {fileID: 4531939895597564}
   - component: {fileID: 33423914848687292}
   - component: {fileID: 23958418044881872}
+  - component: {fileID: 114471938279436630}
   m_Layer: 0
   m_Name: StageLightR
   m_TagString: Untagged
@@ -1279,6 +1281,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ShaderNames:
   - KT/Mobile/DiffuseTint
+--- !u!114 &114471938279436630
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1636822956958724}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -1005838349, guid: 45b809be76fd7a3468b6f517bced6f28, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShaderNames:
+  - KT/Mobile/DiffuseTint
 --- !u!114 &114480448307206344
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1447,6 +1462,19 @@ MonoBehaviour:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1097379778507464}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -1005838349, guid: 45b809be76fd7a3468b6f517bced6f28, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShaderNames:
+  - KT/Mobile/DiffuseTint
+--- !u!114 &114787995995244280
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1076130412706090}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: -1005838349, guid: 45b809be76fd7a3468b6f517bced6f28, type: 3}

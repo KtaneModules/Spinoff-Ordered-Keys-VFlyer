@@ -16,7 +16,7 @@ public partial class OKeysBaseScript : MonoBehaviour {
 
 	protected const string digits = "0123456789";
 
-	protected bool moduleSolved, colorblindDetected, interactable;
+	protected bool moduleSolved, colorblindDetected, interactable, bypassStrike;
 	protected bool[] buttonsPressed;
 	protected string[] keyTypes;
 
@@ -113,6 +113,7 @@ public partial class OKeysBaseScript : MonoBehaviour {
 
 	protected virtual IEnumerator TwitchHandleForcedSolve()
     {
+		bypassStrike = true;
 		yield return HandleSolveAnim();
     }
 }
