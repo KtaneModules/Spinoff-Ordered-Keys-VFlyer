@@ -45,6 +45,8 @@ public class ShorderedKeysScript : OKeysBaseScript {
 
     protected override void HandleIdxPress(int idx)
     {
+        keySelectables[idx].AddInteractionPunch();
+        mAudio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, keySelectables[idx].transform);
         // Handle submission presses here.
         if (inSubmission)
         {
@@ -121,14 +123,14 @@ public class ShorderedKeysScript : OKeysBaseScript {
         //var remainingKeyIdxes = allPossibleKeyIdxes.Skip(36);
         sequenceExpected.Shuffle();
         idxValHidden = Random.Range(1, 7);
-        QuickLog("Keys with a value of {0} are not shown on the module.", idxValHidden);
+        QuickLog("Keys with a value of {0} are not initially shown on the module.", idxValHidden);
         for (var x = 0; x < 6; x++)
         {
             var idxExp = sequenceExpected.IndexOf(x);
             storedIdxKeysSub[x] = storedKeyGroupIdxes[idxExp + 1].PickRandom();
         }
         QuickLogDebug("{0}", storedIdxKeysSub.Join(", "));
-        QuickLog("The keys displayed when the counter reaches 0 are {0}", storedIdxKeysSub.Select(a => string.Format("{0}{1}{2}", possibleCBTexts[a % 6], possibleDisplayTexts[a / 36 % 6], possibleCBTexts[a / 6 % 6])).Join(" "));
+        QuickLog("The keys displayed when the counter reaches 0 are {0}", storedIdxKeysSub.Select(a => string.Format("{0}{1}{2}", possibleCBTexts[a % 6], possibleDisplayTexts[a / 36 % 6], possibleCBTexts[a / 6 % 6])).Join(", "));
         QuickLog("The keys should be pressed in this order by position: {0}", sequenceExpected.Select(a => a + 1).Join(""));
         curSetShown = Enumerable.Range(1, 6).Where(a => a != idxValHidden).PickRandom();
         lastIdxKeyPressed = Random.Range(0, 6);

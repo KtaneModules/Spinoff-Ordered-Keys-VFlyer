@@ -11,22 +11,35 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 615501dbe4f3fe94fbf4b564abb10237, type: 3}
   m_Name: ModConfig
   m_EditorClassIdentifier: 
-  id: unorderedKeys
-  title: Unordered Keys
-  author: Speakingevil
-  description: 'Unordered Keys ver 1.0
+  id: orderedKeysSpinoffs
+  title: Spinoff Ordered Keys
+  author: VFlyer
+  description: 'Spinoff Ordered Keys ver 1.0
 
-    No, this is not Ordered Keys.
+    No, this is not the Ordered Keys that you all know and love. Less suffering, more
+    work.
+
+    A collection of 3 Ordered Keys variants developed by VFlyer. This mod contains:
+
+    - Shordered Keys
+
+    - Baby Ordered Keys
+
+    - Kanyeordered Keys (Idea by "Kanye")
+
+    Module IDs
+
+    Shordered Keys: shorderedKeysModule
+
+    Kanyeordered Keys: kanyeorderedKeys
+
+    Baby Ordered Keys: babyOrderedKeysModule
 
 
-    Press the six keys in order based on their colours, positions and numbers, resetting
-    them when none are valid.
 
+    Model by Speakingevil
 
-    Module ID: unorderedKeys
-
-
-    Created by Speakingevil'
+'
   version: 1.0
   outputFolder: build
-  previewImage: {fileID: 2800000, guid: 0f392a5dd344b0f438779797c434db66, type: 3}
+  previewImage: {fileID: 2800000, guid: cc090e437ed8f7a46a259d5a157328e9, type: 3}

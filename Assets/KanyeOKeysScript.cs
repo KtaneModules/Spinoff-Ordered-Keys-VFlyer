@@ -58,9 +58,7 @@ public class KanyeOKeysScript : OKeysBaseScript {
 		}
 		KButton.OnInteract += delegate {
 			if (interactable)
-            {
 				HandleToggle();
-            }
 			return false;
 		};
 		GenerateStage();
@@ -69,12 +67,15 @@ public class KanyeOKeysScript : OKeysBaseScript {
     protected override void HandleIdxPress(int idx)
     {
 		buttonsPressed[idx] = true;
+		keySelectables[idx].AddInteractionPunch();
+		mAudio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, keySelectables[idx].transform);
 		idxPressed.Add(idx);
 		keySelectables[idx].transform.localPosition = Vector3.back;
 	}
 
     void HandleToggle()
     {
+		KButton.AddInteractionPunch();
 		mAudio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, KButton.transform);
 		hasToggled ^= true;
 		interactable = false;
@@ -89,6 +90,7 @@ public class KanyeOKeysScript : OKeysBaseScript {
 		{
 			QuickLog("{0} is not a valid sequence.", idxPressed.Select(a => a + 1).Join(","));
 			modSelf.HandleStrike();
+			resetCount++;
 			GenerateStage();
 		}
     }
