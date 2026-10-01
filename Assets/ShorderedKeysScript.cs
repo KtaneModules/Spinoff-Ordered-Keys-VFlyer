@@ -290,8 +290,7 @@ public class ShorderedKeysScript : OKeysBaseScript {
                 var curKeyPosSubMod6 = baseKeyPosSub.Select(a => (a + bombInfo.GetSolvedModuleIDs().Count(b => b == modSelf.ModuleType)) % 6).ToArray();
                 var curPosEnterSub = curKeyPosSubMod6[curSetShown - 1];
                 keySelectables[(buttonsPressed[curPosEnterSub] ? (curPosEnterSub + 1) : curPosEnterSub) % keySelectables.Length].OnInteract();
-                while (!interactable)
-                    yield return true;
+                continue;
             }
             if (sequencePressed.Any() && !sequenceExpected.Take(sequencePressed.Count).SequenceEqual(sequencePressed))
             {
@@ -302,6 +301,7 @@ public class ShorderedKeysScript : OKeysBaseScript {
             {
                 keySelectables[sequenceExpected[sequencePressed.Count]].OnInteract();
                 yield return new WaitForSeconds(0.1f);
+                if (!inSubmission) break;
             }
         }
         while (moduleSolved)
