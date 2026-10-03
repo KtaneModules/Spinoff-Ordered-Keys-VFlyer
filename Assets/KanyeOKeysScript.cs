@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using UnityEngine;
 
 public class KanyeOKeysScript : OKeysBaseScript {
@@ -81,8 +82,9 @@ public class KanyeOKeysScript : OKeysBaseScript {
 		interactable = false;
 		if (hasToggled)
 			StartCoroutine(HandleResetAnim());
-		else if (!allowedOrderIdxes.Any() || allowedOrderIdxes.Any(a => a.SequenceEqual(idxPressed)))
+		else if (!allowedOrderIdxes.Any() || allowedOrderIdxes.Any(a => a.SequenceEqual(idxPressed)) || bypassStrike)
 		{
+			moduleSolved = true;
 			mAudio.PlaySoundAtTransform("InputCorrect", transform);
 			StartCoroutine(HandleSolveAnim());
 		}
@@ -132,7 +134,7 @@ public class KanyeOKeysScript : OKeysBaseScript {
 				finalLetterIdxAdjust[x] = curLetterIdx;
 			}
 		}
-		if (attemptCount < 15 && !kanyeIdxes.All(a => finalLetterIdxAdjust.Contains(a)))
+		if (attemptCount < 30 && !kanyeIdxes.All(a => finalLetterIdxAdjust.Contains(a)))
 			goto retry;
 		if (kanyeIdxes.All(a => finalLetterIdxAdjust.Contains(a)))
 			QuickLogDebug("{0} attempt{1} taken to focus 5 distinct letters.", attemptCount, attemptCount == 1 ? "" : "s");
@@ -190,7 +192,6 @@ public class KanyeOKeysScript : OKeysBaseScript {
 
     protected override IEnumerator HandleSolveAnim(float delay = 0.5F, int repeatCount = 5)
     {
-		moduleSolved = true;
 		stageLights.First().enabled = true;
 		for (var x = 0; x < keyRenderers.Length; x++)
 		{
@@ -204,6 +205,7 @@ public class KanyeOKeysScript : OKeysBaseScript {
 			keyRenderers[x].material.mainTexture = kanyeImg;
 			keyTexts[x].color = Color.black;
 		}
+		mAudio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.CorrectChime, transform);
 		modSelf.HandlePass();
 	}
 
@@ -249,6 +251,105 @@ public class KanyeOKeysScript : OKeysBaseScript {
 		keyTexts[keyIdx].color = possibleColorTexts[idxTxtClr];
 		keyTexts[keyIdx].text = colorblindDetected ? string.Format("{0}\n{1}\n\n{2}", pickedText, possibleCBTexts[idxTxtClr], possibleCBTexts[idxColor]) : pickedText;
 	}
-	private readonly string TwitchHelpMessage = "!{0} press 0123 [position in reading order, \"press\" optional, 0 = display] | !{0} colorblind/colourblind/cb";
 
+    protected override void HandleColorblindModeToggle()
+    {
+		base.HandleColorblindModeToggle();
+        if (hasToggled)
+			for (var x = 0; x < keyRenderers.Length; x++)
+            {
+				var keyRef = keyTypes[x];
+				SetKeyVisuals(x,
+					alphabet.IndexOf(keyRef[0]),
+					alphabet.IndexOf(keyRef[1]),
+					alphabet.IndexOf(keyRef[2]));
+			}
+
+	}
+
+    private readonly string TwitchHelpMessage = "!{0} press 0123456 [position in reading order, \"press\" optional, 0 = display] | !{0} colorblind/colourblind/cb";
+
+	protected override IEnumerator ProcessTwitchCommand(string cmd)
+	{
+		if (!interactable)
+		{
+			yield return "sendtochaterror The module is not ready to accept commands right now. Wait a bit until the module is ready.";
+			yield break;
+		}
+		var rgxCB = Regex.Match(cmd, @"^(colou?rblind|cb)$", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
+		var rgxPress = Regex.Match(cmd, @"^(press\s)?(\d+\s?)+", RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
+		if (rgxCB.Success)
+		{
+			yield return null;
+			HandleColorblindModeToggle();
+			yield break;
+		}
+		else if (rgxPress.Success)
+		{
+			var validPressCmd = rgxPress.Value.ToLowerInvariant().Trim();
+			if (validPressCmd.StartsWith("press"))
+				validPressCmd = validPressCmd.Substring(5).Trim();
+			var validPressCmdParts = validPressCmd.Split();
+			var validDigits = "0123456";
+			var allIdxes = new List<int>();
+			foreach (var valPart in validPressCmdParts)
+			{
+				foreach (var chr in valPart)
+				{
+					if (!validDigits.Contains(chr))
+					{
+						yield return string.Format("sendtochaterror The corresponding character \"{0}\" is not a valid digit!", chr);
+						yield break;
+					}
+					allIdxes.Add(validDigits.IndexOf(chr));
+				}
+			}
+			if (allIdxes.Any())
+			{
+				yield return null;
+				var allKeys = new[] { KButton }.Concat(keySelectables).ToArray();
+				foreach (var idx in allIdxes)
+				{
+					allKeys[idx].OnInteract();
+					yield return new WaitForSeconds(0.1f);
+				}
+				if (moduleSolved)
+					yield return "solve";
+			}
+		}
+	}
+	protected override IEnumerator TwitchHandleForcedSolve()
+	{
+		bypassStrike = true;
+		while (!moduleSolved)
+		{
+			while (!interactable)
+				yield return true;
+
+			if (!hasToggled || !allowedOrderIdxes.Any())
+            {
+				KButton.OnInteract();
+				yield return new WaitForSeconds(0.1f);
+			}
+			else
+            {
+				var remainingPickedAllowedOrders = allowedOrderIdxes.Where(a => !idxPressed.Any() || a.Take(idxPressed.Count).SequenceEqual(idxPressed));
+				if (!remainingPickedAllowedOrders.Any())
+                {
+					yield return HandleSolveAnim(delay: 0.1f, repeatCount: 10);
+					yield break;
+				}
+				var randomlyPickedOrder = remainingPickedAllowedOrders.PickRandom();
+				foreach (var idx in randomlyPickedOrder)
+                {
+					keySelectables[idx].OnInteract();
+					yield return new WaitForSeconds(0.1f);
+				}
+				KButton.OnInteract();
+				yield return new WaitForSeconds(0.1f);
+			}
+		}
+		while (moduleSolved)
+			yield return true;
+	}
 }

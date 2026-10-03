@@ -125,15 +125,15 @@ public class BabyOKeysScript : OKeysBaseScript {
 		if (sequencePressed.Count >= 3)
         {
 			QuickLog("The following keys were pressed: {0}", sequencePressed.Select(a => a + 1).Join(", "));
-			if (sequencePressed.SequenceEqual(sequenceExpected))
+			if (sequencePressed.SequenceEqual(sequenceExpected) || bypassStrike)
 			{
 				mAudio.PlaySoundAtTransform("InputCorrect", transform);
 				stagesCompleted++;
 				if (stagesCompleted >= 2)
 				{
 					moduleSolved = true;
-					StartCoroutine(HandleSolveAnim(0.1f, 10));
 					interactable = false;
+					StartCoroutine(HandleSolveAnim(0.1f, 10));
 				}
 				else
 					GenerateStage();
@@ -219,7 +219,7 @@ public class BabyOKeysScript : OKeysBaseScript {
 		else if (rgxPress.Success)
         {
 			var validPressCmd = rgxPress.Value.ToLowerInvariant().Trim();
-			if (validPressCmd.StartsWith("start"))
+			if (validPressCmd.StartsWith("press "))
 				validPressCmd = validPressCmd.Substring(5).Trim();
 			var validPressCmdParts = validPressCmd.Split();
 			var validDigits = "123";
@@ -252,6 +252,7 @@ public class BabyOKeysScript : OKeysBaseScript {
 
     protected override IEnumerator TwitchHandleForcedSolve()
     {
+		bypassStrike = true;
 		while (!moduleSolved)
         {
 			while (!interactable)
@@ -264,10 +265,11 @@ public class BabyOKeysScript : OKeysBaseScript {
 			}
 			while (sequencePressed.Count < sequenceExpected.Count)
             {
+				if (!interactable) break;
 				keySelectables[sequenceExpected[sequencePressed.Count]].OnInteract();
 				yield return new WaitForSeconds(0.1f);
             }
-        }
+		}
 		while (moduleSolved)
 			yield return true;
 	}

@@ -14,7 +14,7 @@ MonoBehaviour:
   id: orderedKeysSpinoffs
   title: Spinoff Ordered Keys
   author: VFlyer
-  description: 'Spinoff Ordered Keys ver 1.0
+  description: 'Spinoff Ordered Keys ver 1.0.1
 
     No, this is not the Ordered Keys that you all know and love. It still loves to
     reset on you.
@@ -36,10 +36,9 @@ MonoBehaviour:
     Baby Ordered Keys: babyOrderedKeysModule
 
 
-
-    Model by Speakingevil
+    Ordered Keys Model by Speakingevil
 
 '
-  version: 1.0
+  version: 1.0.1
   outputFolder: build
   previewImage: {fileID: 2800000, guid: cc090e437ed8f7a46a259d5a157328e9, type: 3}

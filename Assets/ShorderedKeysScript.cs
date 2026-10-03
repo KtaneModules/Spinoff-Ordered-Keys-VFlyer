@@ -54,7 +54,7 @@ public class ShorderedKeysScript : OKeysBaseScript {
             keySelectables[idx].transform.localPosition = Vector3.back;
             sequencePressed.Add(idx);
             if (buttonsPressed.All(a => a))
-                if (sequenceExpected.SequenceEqual(sequencePressed))
+                if (sequenceExpected.SequenceEqual(sequencePressed) || bypassStrike)
                 {
                     moduleSolved = true;
                     mAudio.PlaySoundAtTransform("InputCorrect", transform);
@@ -228,6 +228,28 @@ public class ShorderedKeysScript : OKeysBaseScript {
         mAudio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.CorrectChime, transform);
         modSelf.HandlePass();
     }
+
+    protected override void HandleColorblindModeToggle()
+    {
+        colorblindDetected ^= true;
+        if (inSubmission)
+        {
+            for (var x = 0; x < keyRenderers.Length; x++)
+            {
+                var keyIdxCur = storedIdxKeysSub[x];
+                SetKeyVisuals(x, keyIdxCur % 6, keyIdxCur / 6 % 6, keyIdxCur / 36 % 6);
+            }
+        }
+        else
+        {
+            for (var x = 0; x < keyRenderers.Length; x++)
+            {
+                var keyIdxesCur = storedKeyGroupIdxes[curSetShown];
+                SetKeyVisuals(x, keyIdxesCur[x] % 6, keyIdxesCur[x] / 6 % 6, keyIdxesCur[x] / 36 % 6);
+            }
+        }
+    }
+
     private readonly string TwitchHelpMessage = "!{0} press 123456 [position in reading order, \"press\" optional] | !{0} colorblind/colourblind/cb";
 
     protected override IEnumerator ProcessTwitchCommand(string cmd)
@@ -248,7 +270,7 @@ public class ShorderedKeysScript : OKeysBaseScript {
         else if (rgxPress.Success)
         {
             var validPressCmd = rgxPress.Value.ToLowerInvariant().Trim();
-            if (validPressCmd.StartsWith("start"))
+            if (validPressCmd.StartsWith("press"))
                 validPressCmd = validPressCmd.Substring(5).Trim();
             var validPressCmdParts = validPressCmd.Split();
             var validDigits = "123";
@@ -281,6 +303,7 @@ public class ShorderedKeysScript : OKeysBaseScript {
 
     protected override IEnumerator TwitchHandleForcedSolve()
     {
+        bypassStrike = true;
         while (!moduleSolved)
         {
             while (!interactable)

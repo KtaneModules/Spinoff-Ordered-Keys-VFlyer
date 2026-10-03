@@ -30,6 +30,18 @@ public partial class OKeysBaseScript : MonoBehaviour {
     {
 		Debug.LogFormat("<{0} #{1}> {2}", modSelf.ModuleDisplayName, moduleID, string.Format(toLog, args));
     }
+
+	protected virtual void Awake()
+    {
+		try
+        {
+			colorblindDetected = colorblindMode.ColorblindModeActive;
+        }
+		catch
+        {
+			colorblindDetected = false;
+        }
+    }
 	protected virtual void Start()
     {
 		buttonsPressed = new bool[keySelectables.Length];
@@ -103,7 +115,7 @@ public partial class OKeysBaseScript : MonoBehaviour {
 
 	protected virtual void HandleColorblindModeToggle()
     {
-
+		colorblindDetected ^= true;
     }
 
 	protected virtual IEnumerator ProcessTwitchCommand(string cmd)
