@@ -273,7 +273,7 @@ public class ShorderedKeysScript : OKeysBaseScript {
             if (validPressCmd.StartsWith("press"))
                 validPressCmd = validPressCmd.Substring(5).Trim();
             var validPressCmdParts = validPressCmd.Split();
-            var validDigits = "123";
+            var validDigits = "123456";
             var allIdxes = new List<int>();
             foreach (var valPart in validPressCmdParts)
             {

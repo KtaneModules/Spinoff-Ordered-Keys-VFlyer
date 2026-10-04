@@ -39,6 +39,6 @@ MonoBehaviour:
     Ordered Keys Model by Speakingevil
 
 '
-  version: 1.0.1
+  version: 1.0.2
   outputFolder: build
   previewImage: {fileID: 2800000, guid: cc090e437ed8f7a46a259d5a157328e9, type: 3}
